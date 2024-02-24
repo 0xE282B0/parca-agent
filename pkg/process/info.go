@@ -19,7 +19,6 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -242,12 +241,8 @@ func (im *InfoManager) fetch(ctx context.Context, pid int, checkMappings bool) (
 	if err != nil {
 		return Info{}, fmt.Errorf("failed to open proc %d: %w", pid, err)
 	}
-	exe, err := proc.Executable()
-	if err != nil {
-		return Info{}, fmt.Errorf("failed to get executable for proc %d: %w", pid, err)
-	}
 	// Cache the executable path for future needs.
-	path := filepath.Join(fmt.Sprintf("/proc/%d/root", pid), exe)
+	path := fmt.Sprintf("/proc/%d/exe", pid)
 	if !(strings.Contains(path, "(deleted)") || strings.Contains(path, "memfd:")) {
 		if _, err = im.objFilePool.Open(path); err != nil {
 			return Info{}, fmt.Errorf("failed to get executable object file for %s: %w", path, err)
